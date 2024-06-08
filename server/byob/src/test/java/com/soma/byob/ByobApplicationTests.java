@@ -6,8 +6,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class ByobApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    void contextLoads() {
+        System.out.println("Context loaded successfully!22");
+    }
 
 }

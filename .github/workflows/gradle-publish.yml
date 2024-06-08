@@ -8,9 +8,10 @@
 name: Gradle Package
 
 on:
-  push:
+  pull_request:
+    types: [closed]
     branches:
-      - 'server/develop'
+      - 'server/release/*'
 
 jobs:
   build:

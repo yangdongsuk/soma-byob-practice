@@ -44,7 +44,7 @@ jobs:
 
   run-docker-image-on-ec2:
     needs: build-docker-image
-    runs-on: self-hosted
+    runs-on: [self-hosted, front]
     steps:
     - name: docker pull
       run: sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/nextjs-cicd-test

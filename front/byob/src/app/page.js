@@ -23,7 +23,7 @@ export default function Home() {
       <h1 className="text-4xl mb-8">소마 비욥 통합 관리 시스템</h1>
       <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-2xl">
         <p className="font-mono text-lg">
-          과연 스프링 서버와 연결이 잘 되었을까요?
+          과연 스프링 서버와 연결이 잘 되었을까요????????????
         </p>
         <div className="mt-4 p-4 bg-gray-900 rounded-lg font-mono text-sm text-green-400">
           {status}

@@ -1,4 +1,4 @@
-name: Gradle Package
+name: Build and Deploy Spring Docker Image
 
 on:
   pull_request:
@@ -45,25 +45,55 @@ jobs:
     - name: Docker Hub push
       run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/spring-cicd-test
 
-  run-docker-image-on-ec2:
+  deploy-to-az1:
     needs: build-docker-image
-    runs-on: [self-hosted, backend]
-    strategy:
-      matrix:
-        runner: [ip-10-54-0-143, ip-10-54-31-196, ip-172-31-11-94]
-
+    runs-on: [self-hosted, backend, az1]
     steps:
+    - name: Clean up Docker system before pulling
+      run: |
+        sudo docker stop $(sudo docker ps -aq) || true
+        sudo docker container prune -f || true
+        sudo docker image prune -a -f || true
+        sudo docker volume prune -f || true
+        sudo docker network prune -f || true
+        sudo docker system prune -a -f || true
+
     - name: docker pull
       run: sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/spring-cicd-test
-
-    - name: docker stop container
-      run: |
-        if [ $(sudo docker ps -a -q -f name=spring-cicd-test) ]; then
-          sudo docker stop spring-cicd-test
-        fi
 
     - name: docker run new container
       run: sudo docker run --rm -it -d -p 80:8080 --name spring-cicd-test ${{ secrets.DOCKERHUB_USERNAME }}/spring-cicd-test
 
-    - name: delete old docker image
-      run: sudo docker system prune -f
+    - name: Clean up unused Docker images after deployment
+      run: |
+        sudo docker image prune -a -f || true
+        
+    - name: Wait for the application to start
+      run: sleep 15
+
+    - name: Health check
+      run: |
+        curl -f http://localhost:80/ || exit 1
+
+  deploy-to-az2:
+    needs: deploy-to-az1
+    runs-on: [self-hosted, backend, az2]
+    steps:
+    - name: Clean up Docker system before pulling
+      run: |
+        sudo docker stop $(sudo docker ps -aq) || true
+        sudo docker container prune -f || true
+        sudo docker image prune -a -f || true
+        sudo docker volume prune -f || true
+        sudo docker network prune -f || true
+        sudo docker system prune -a -f || true
+
+    - name: docker pull
+      run: sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/spring-cicd-test
+
+    - name: docker run new container
+      run: sudo docker run --rm -it -d -p 80:8080 --name spring-cicd-test ${{ secrets.DOCKERHUB_USERNAME }}/spring-cicd-test
+
+    - name: Clean up unused Docker images after deployment
+      run: |
+        sudo docker image prune -a -f || true

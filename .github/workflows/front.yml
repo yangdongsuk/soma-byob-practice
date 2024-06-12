@@ -53,7 +53,7 @@ jobs:
         sudo docker image prune -a -f || true
         
     - name: Wait for the application to start
-      run: sleep 30
+      run: sleep 15
 
     - name: Health check
       run: |

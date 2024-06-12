@@ -51,6 +51,9 @@ jobs:
     - name: Clean up unused Docker images after deployment
       run: |
         sudo docker image prune -a -f || true
+        
+    - name: Wait for the application to start
+      run: sleep 30
 
     - name: Health check
       run: |

@@ -48,6 +48,9 @@ jobs:
   run-docker-image-on-ec2:
     needs: build-docker-image
     runs-on: [self-hosted, backend]
+    strategy:
+      matrix:
+        runner: [ip-10-54-0-143, ip-10-54-31-196, ip-172-31-11-94]
 
     steps:
     - name: docker pull

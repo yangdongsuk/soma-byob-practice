@@ -54,7 +54,7 @@ jobs:
 
     - name: Health check
       run: |
-        curl -f http://localhost:3000/health || exit 1
+        curl -f http://localhost:80/ || exit 1
 
   deploy-to-az2:
     needs: deploy-to-az1

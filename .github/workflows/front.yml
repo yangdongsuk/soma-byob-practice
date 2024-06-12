@@ -29,12 +29,36 @@ jobs:
     - name: Push Docker image to Docker Hub
       run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/nextjs-cicd-test
 
-  run-docker-image-on-ec2:
+  deploy-to-az1:
     needs: build-docker-image
-    runs-on: [self-hosted, front]
-    strategy:
-      matrix:
-        runner: [ip-10-54-25-112, ip-10-54-5-3, ip-172-31-2-121]
+    runs-on: [self-hosted, front, az1]
+    steps:
+    - name: Clean up Docker system before pulling
+      run: |
+        sudo docker stop $(sudo docker ps -aq) || true
+        sudo docker container prune -f || true
+        sudo docker image prune -a -f || true
+        sudo docker volume prune -f || true
+        sudo docker network prune -f || true
+        sudo docker system prune -a -f || true
+
+    - name: docker pull
+      run: sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/nextjs-cicd-test
+
+    - name: docker run new container
+      run: sudo docker run --rm -it -d -p 80:3000 --name nextjs-cicd-test -e SPRING_PRIVATE_DNS_URL=${{ secrets.SPRING_PRIVATE_DNS_URL }} ${{ secrets.DOCKERHUB_USERNAME }}/nextjs-cicd-test
+
+    - name: Clean up unused Docker images after deployment
+      run: |
+        sudo docker image prune -a -f || true
+
+    - name: Health check
+      run: |
+        curl -f http://localhost:3000/health || exit 1
+
+  deploy-to-az2:
+    needs: deploy-to-az1
+    runs-on: [self-hosted, front, az2]
     steps:
     - name: Clean up Docker system before pulling
       run: |
